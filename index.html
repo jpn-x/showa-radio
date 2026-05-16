@@ -477,8 +477,8 @@ body.night #freq-text {
         </div>
         <div class="glow-dot"></div>
       </div>
-      <!-- YouTube -->
-      <iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <!-- YouTube IFrame API がここにiframeを生成 -->
+      <div id="player" style="width:100%;height:100%"></div>
     </div>
   </div>
 
@@ -529,170 +529,192 @@ body.night #freq-text {
 
 </div>
 
+<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-const songs = [
-  { title:"柔", artist:"美空ひばり", id:"U4NFP_hKPqs", mood:"ラジオから流れてくる、あの懐かしい声がします" },
-  { title:"お祭りマンボ", artist:"美空ひばり", id:"hGBU4wlrT5A", mood:"縁日の夜、賑やかな歌声が商店街に響いていた" },
-  { title:"川の流れのように", artist:"美空ひばり", id:"Pb-N5VPy-40", mood:"人生という川は、ゆっくりと、ゆっくりと流れてゆく" },
-  { title:"上を向いて歩こう", artist:"坂本九", id:"ip2U3w6b9rU", mood:"涙がこぼれないように、空を見上げて歩いた日々" },
-  { title:"見上げてごらん夜の星を", artist:"坂本九", id:"3hNQsRmAAC0", mood:"夜空に輝く星たちが、そっとあなたを照らしている" },
-  { title:"明日があるさ", artist:"坂本九", id:"W4rpbXLGVT4", mood:"どんな日も、明日はきっといい日になる。そう信じていた" },
-  { title:"恋の町札幌", artist:"石原裕次郎", id:"xKsP_vFVi9c", mood:"北の都の青い空に、あの頃の青春が蘇ってくる" },
-  { title:"夜霧よ今夜も有難う", artist:"石原裕次郎", id:"rVG3x1BsE-4", mood:"港の夜霧に包まれて、遠い記憶がゆらゆら漂う" },
-  { title:"ブランデーグラス", artist:"石原裕次郎", id:"IOgAf9iHE0o", mood:"グラスの中に、昭和の夜の灯りが揺れている" },
-  { title:"別れの一本杉", artist:"春日八郎", id:"EVFnx9SfIMM", mood:"丘の上の一本杉のもと、あの別れの日を静かに想う" },
-  { title:"お富さん", artist:"春日八郎", id:"p2sDnxlepRU", mood:"粋でいなせな江戸の風情、昭和に蘇る名曲" },
-  { title:"哀愁列車", artist:"三橋美智也", id:"EB_sSvj81qg", mood:"汽笛が遠ざかるたびに、旅の哀愁が胸に染みる" },
-  { title:"夕焼けとんび", artist:"三橋美智也", id:"puTR6WI01XY", mood:"夕焼け色の空にとんびが舞う、懐かしい故郷の景色" },
-  { title:"王将", artist:"村田英雄", id:"f4ys6bg-G_E", mood:"男の不屈の魂、昭和を生きた人々の誇り" },
-  { title:"人生劇場", artist:"村田英雄", id:"NQ8l9_vD0Do", mood:"人生という名の舞台に、今日も幕が上がる" },
-  { title:"アンコ椿は恋の花", artist:"都はるみ", id:"ADni5mr0IH4", mood:"南の島に椿が咲いて、恋の歌声が潮風に乗る" },
-  { title:"北の宿から", artist:"都はるみ", id:"BfX11nTfp3Y", mood:"雪深い宿に届く、温かな想いの一首" },
-  { title:"東京だョおっ母さん", artist:"島倉千代子", id:"agqzvIx7wLE", mood:"お母さんと歩いた東京、あの懐かしい街の風景" },
-  { title:"からたち日記", artist:"島倉千代子", id:"Ik67FcC1YHk", mood:"からたちの垣根のそばで、青春の思い出が咲いている" },
-  { title:"丘を越えて", artist:"藤山一郎", id:"Uy54auHnKhA", mood:"丘を越え、野を越えて、あの頃の希望の歌が響く" },
-  { title:"伊勢佐木町ブルース", artist:"青江三奈", id:"BKkTqOtWXio", mood:"横浜の夜の灯りのなかに、あの街の記憶が揺れる" },
-  { title:"長崎ブルース", artist:"青江三奈", id:"3EjoLwwSf38", mood:"長崎の港に夕暮れが来て、遠い日の歌声が流れてくる" },
-  // ── 追加アーティスト ──
-  { title:"与作", artist:"北島三郎", id:"R45N2MCI85g", mood:"木を削る音とともに、男の生きざまが聞こえてくる" },
-  { title:"まつり", artist:"北島三郎", id:"k0XbnO8muuA", mood:"太鼓の音が腹に響く、昭和の祭りの熱気" },
-  { title:"おふくろさん", artist:"森進一", id:"BqgDo3WYE-s", mood:"遠く離れたお母さんへ、胸が締め付けられる歌" },
-  { title:"よこはま・たそがれ", artist:"五木ひろし", id:"rFJgSg9XOZw", mood:"黄昏の横浜、潮の香りと哀愁が漂う" },
-  { title:"北酒場", artist:"細川たかし", id:"QBJzNyS3A5A", mood:"北の居酒屋に灯りがともって、あの夜の歌が流れる" },
-  { title:"舟唄", artist:"八代亜紀", id:"yGI0QZ4Gk34", mood:"波の上を揺れながら、切ない歌声が沁みる" },
-  { title:"北国の春", artist:"千昌夫", id:"5NvRyAn6jWQ", mood:"故郷の春の便りが、遠い地の胸を温める" },
-  { title:"星影のワルツ", artist:"千昌夫", id:"glAAGoSMvzU", mood:"星明りの下、ワルツのリズムに昔の恋が蘇る" },
-  { title:"高校三年生", artist:"舟木一夫", id:"jnNvTTDZJvc", mood:"あの頃の青春、教室の窓から見えた青い空" },
-  { title:"君たちがいて僕がいた", artist:"舟木一夫", id:"6sZXae9SKlo", mood:"仲間と過ごしたかけがえのない日々を想う" },
-  { title:"潮来笠", artist:"橋幸夫", id:"Im9BVo-riCo", mood:"股旅もの、道中の風に吹かれた昭和の男旅" },
-  { title:"君といつまでも", artist:"加山雄三", id:"bBhe_flTjU0", mood:"幸せだなぁ、あの頃の純粋な気持ちが蘇る" },
-  { title:"喝采", artist:"ちあきなおみ", id:"y1KP9qhC_78", mood:"舞台の幕が上がる瞬間、あの日の知らせが届いた" },
-  { title:"自動車ショー歌", artist:"小林旭", id:"w5HEt7Jw47M", mood:"昭和の高度成長期、明るく賑やかな時代の歌" },
-  { title:"三百六十五歩のマーチ", artist:"水前寺清子", id:"hEXAdhFPp7M", mood:"一歩一歩、元気よく前へ進もう。昭和の励ましの歌" },
-  { title:"今日でお別れ", artist:"菅原洋一", id:"yRM37uP-9GU", mood:"別れの言葉が胸に残る、大人の哀愁" },
-  { title:"夕月", artist:"黛ジュン", id:"K3gSTLx15fc", mood:"夕暮れの月が昇るころ、あの人を想う" },
-  { title:"いつでも夢を", artist:"吉永小百合", id:"elpvPpRnp0o", mood:"夢を持って生きれば、いつかきっと叶う日が来る" },
-  { title:"星のフラメンコ", artist:"西郷輝彦", id:"dgArKk2i_ko", mood:"情熱的なリズムに乗せて、恋心が踊り出す" },
-  { title:"恋の奴隷", artist:"奥村チヨ", id:"yPnb28PQEpk", mood:"昭和の女心、一途に想い続けるこの気持ち" },
-  { title:"終着駅", artist:"奥村チヨ", id:"KR25fJN4I98", mood:"列車が終点に着く頃、二人の物語も終わりを告げる" },
-  { title:"人形の家", artist:"弘田三枝子", id:"tkIHUIkuzPs", mood:"きれいな人形のように生きることへの問いかけ" },
-  { title:"古い日記", artist:"和田アキ子", id:"HGnjd3PZsos", mood:"古い日記のページをめくるたびに、懐かしい日々が蘇る" },
-  { title:"出世街道", artist:"畠山みどり", id:"fBpJZwaHpgQ", mood:"一本気な男の生き方、昭和の心意気" },
-  { title:"この広い野原いっぱい", artist:"森山良子", id:"n1tf8pmiFlg", mood:"広い野原に咲く花のように、あなたへの想いが広がる" },
-  { title:"別れの朝", artist:"ペドロ&カプリシャス", id:"v2x6yRRfq7g", mood:"朝の光の中、涙をこらえた別れの記憶" },
-  { title:"夜明けのスキャット", artist:"由紀さおり", id:"mvssMZIwtjA", mood:"夜が明けていく空に、ため息のような歌声が溶ける" },
-  { title:"ブルー・ライト・ヨコハマ", artist:"いしだあゆみ", id:"VbuDwcfpvxs", mood:"横浜の青い夜景、ふたりで歩いたあの夜道" },
-  { title:"圭子の夢は夜ひらく", artist:"藤圭子", id:"oSJhlPyVqMY", mood:"夜が更けるほど、夢だけが静かに花を開く" },
-  { title:"愛人", artist:"桂銀淑", id:"KUzzzPryMUg", mood:"胸が熱くなる、あの切ない恋の歌声が蘇る" },
-  { title:"ためいきワルツ", artist:"桂銀淑", id:"tsyb2r9YGbc", mood:"ため息まじりのワルツに、懐かしい夜が揺れる" },
-  { title:"オモニ", artist:"桂銀淑", id:"XEyH_dWrVAU", mood:"お母さん、あなたのことをいつも想っています" },
-  { title:"想い出のサンフランシスコ", artist:"桂銀淑", id:"TDajcBKqRb8", mood:"遠い街の思い出、あの頃の景色が心に浮かぶ" },
-  // ── 追加リクエスト ──
-  { title:"函館の女", artist:"北島三郎", id:"YGjZuZD36OE", mood:"函館の波止場に潮風が吹いて、あの人を想う" },
-  { title:"チャンチキおけさ", artist:"三波春夫", id:"F7s35YgHJsI", mood:"チャンチキの音色とともに、祭り囃子が心に響く" },
-  { title:"東京五輪音頭", artist:"三波春夫", id:"0VduY4upWGc", mood:"昭和39年、あの輝かしいオリンピックの夏が蘇る" },
-  { title:"いっぽんどっこの唄", artist:"水前寺清子", id:"G7cNzoCkt3M", mood:"一本どっこで立ち上がれ、昭和の元気の歌" },
-  { title:"有楽町で逢いましょう", artist:"フランク永井", id:"7Nog3QNmCq4", mood:"銀座の灯りが輝く頃、あの場所であなたを待っていた" },
-  { title:"君恋し", artist:"フランク永井", id:"T4WRhVN0r2Y", mood:"低く響く声に、切ない恋心が滲み出る" },
-  { title:"昔の名前で出ています", artist:"小林旭", id:"KeEPGmrOTLI", mood:"懐かしい名前とともに、過ぎ去った日々が蘇る" },
-  { title:"傷だらけの人生", artist:"鶴田浩二", id:"Ql5cBQgqr9w", mood:"傷を負いながらも歩み続けた、昭和の男の哀愁" },
-  { title:"赤と黒のブルース", artist:"鶴田浩二", id:"vPHrOE8Dq5M", mood:"赤と黒のコントラスト、夜の街に沁みるブルース" },
-  { title:"港町ブルース", artist:"森進一", id:"zNY7Tg6FWcQ", mood:"港の夜風に吹かれて、別れの歌が波に溶ける" },
-  { title:"襟裳岬", artist:"森進一", id:"KNUT1OBe2ds", mood:"北の果ての岬に立って、遠い空を見つめていた" },
-  { title:"雨の慕情", artist:"八代亜紀", id:"FZMWYN8pzG0", mood:"雨が降るたびに、あなたへの想いが溢れてくる" },
-  { title:"男はつらいよ", artist:"渥美清", id:"qjd-4rrX1K8", mood:"どこか憎めない寅さん、昭和の人情と温もり" },
-  { title:"東京ブギウギ", artist:"笠置シヅ子", id:"6SfpSymF0MI", mood:"戦後の東京に活気が戻った、あの弾けるような喜び" },
-  { title:"憧れのハワイ航路", artist:"岡晴夫", id:"avVzCPj35pE", mood:"青い海の向こうに夢を描いた、昭和の旅への憧れ" },
-  { title:"湯の町エレジー", artist:"近江俊郎", id:"gk9-C_m0AxU", mood:"温泉宿の灯りに揺れる、哀愁漂う宵の歌" },
-  { title:"誰か故郷を想わざる", artist:"霧島昇", id:"enPeWz8eSFI", mood:"故郷の山河が目に浮かぶ、胸に染み入る望郷の歌" },
-  { title:"南国土佐を後にして", artist:"ペギー葉山", id:"sMrd02ncmOY", mood:"土佐の青い空と海、故郷を後にした日の記憶" },
-  { title:"テネシーワルツ", artist:"江利チエミ", id:"K6ejvhIrA94", mood:"ワルツのリズムに乗せて、遠い夜の恋物語" },
-  { title:"想い出のワルツ", artist:"雪村いづみ", id:"SLWjkjhHfJA", mood:"もう一度ワルツが踊れたなら、あの日に戻れるのに" },
-  { title:"恋のバカンス", artist:"ザ・ピーナッツ", id:"Mvv0MrKredE", mood:"ふたつの声が重なって、夏のバカンスが弾ける" },
-  { title:"恋のフーガ", artist:"ザ・ピーナッツ", id:"wAsLK0ZPXM8", mood:"追いかけて、追いかけて、恋のフーガが駆け抜ける" },
-  { title:"お座敷小唄", artist:"和田弘とマヒナスターズ", id:"QPOm1TP5x7Y", mood:"お座敷の灯りのもと、粋な小唄が流れていた" },
-  { title:"ラブユー東京", artist:"ロス・プリモス", id:"QV78dQsYSvo", mood:"東京の夜、甘い声とともに恋の歌が流れる" },
-  { title:"わたし祈ってます", artist:"敏いとうとハッピー&ブルー", id:"DNu3wGia2ZE", mood:"あなたの幸せを、静かにそっと祈っている" },
-  { title:"長崎は今日も雨だった", artist:"内山田洋とクール・ファイブ", id:"YGfseX5WdVE", mood:"長崎の雨に濡れながら、あの日の別れを想う" },
-  { title:"心のこり", artist:"細川たかし", id:"Y91DSSqpeYY", mood:"心の奥に残るあの人の面影、忘れられない記憶" },
+const PLAYLIST_ID = 'PLf7jVZtKzGTe4IVUfKJJdm0gjj08K05Pg';
+
+// 気分メッセージプール（曲が変わるたびにランダム表示）
+const moodPool = [
+  "ラジオから流れてくる、あの懐かしい声がします",
+  "縁日の夜、賑やかな歌声が商店街に響いていた",
+  "人生という川は、ゆっくりと、ゆっくりと流れてゆく",
+  "涙がこぼれないように、空を見上げて歩いた日々",
+  "夜空に輝く星たちが、そっとあなたを照らしている",
+  "どんな日も、明日はきっといい日になる。そう信じていた",
+  "港の夜霧に包まれて、遠い記憶がゆらゆら漂う",
+  "グラスの中に、昭和の夜の灯りが揺れている",
+  "丘の上の一本杉のもと、あの別れの日を静かに想う",
+  "汽笛が遠ざかるたびに、旅の哀愁が胸に染みる",
+  "夕焼け色の空にとんびが舞う、懐かしい故郷の景色",
+  "男の不屈の魂、昭和を生きた人々の誇り",
+  "人生という名の舞台に、今日も幕が上がる",
+  "雪深い宿に届く、温かな想いの一首",
+  "お母さんと歩いた東京、あの懐かしい街の風景",
+  "丘を越え、野を越えて、あの頃の希望の歌が響く",
+  "横浜の夜の灯りのなかに、あの街の記憶が揺れる",
+  "長崎の港に夕暮れが来て、遠い日の歌声が流れてくる",
+  "木を削る音とともに、男の生きざまが聞こえてくる",
+  "太鼓の音が腹に響く、昭和の祭りの熱気",
+  "遠く離れたお母さんへ、胸が締め付けられる歌",
+  "黄昏の横浜、潮の香りと哀愁が漂う",
+  "北の居酒屋に灯りがともって、あの夜の歌が流れる",
+  "波の上を揺れながら、切ない歌声が沁みる",
+  "故郷の春の便りが、遠い地の胸を温める",
+  "星明りの下、ワルツのリズムに昔の恋が蘇る",
+  "あの頃の青春、教室の窓から見えた青い空",
+  "仲間と過ごしたかけがえのない日々を想う",
+  "幸せだなぁ、あの頃の純粋な気持ちが蘇る",
+  "舞台の幕が上がる瞬間、あの日の知らせが届いた",
+  "一歩一歩、元気よく前へ進もう。昭和の励ましの歌",
+  "別れの言葉が胸に残る、大人の哀愁",
+  "夕暮れの月が昇るころ、あの人を想う",
+  "夢を持って生きれば、いつかきっと叶う日が来る",
+  "昭和の女心、一途に想い続けるこの気持ち",
+  "列車が終点に着く頃、二人の物語も終わりを告げる",
+  "古い日記のページをめくるたびに、懐かしい日々が蘇る",
+  "広い野原に咲く花のように、あなたへの想いが広がる",
+  "朝の光の中、涙をこらえた別れの記憶",
+  "夜が明けていく空に、ため息のような歌声が溶ける",
+  "横浜の青い夜景、ふたりで歩いたあの夜道",
+  "夜が更けるほど、夢だけが静かに花を開く",
+  "胸が熱くなる、あの切ない恋の歌声が蘇る",
+  "ため息まじりのワルツに、懐かしい夜が揺れる",
+  "お母さん、あなたのことをいつも想っています",
+  "遠い街の思い出、あの頃の景色が心に浮かぶ",
+  "函館の波止場に潮風が吹いて、あの人を想う",
+  "チャンチキの音色とともに、祭り囃子が心に響く",
+  "昭和39年、あの輝かしいオリンピックの夏が蘇る",
+  "銀座の灯りが輝く頃、あの場所であなたを待っていた",
+  "低く響く声に、切ない恋心が滲み出る",
+  "懐かしい名前とともに、過ぎ去った日々が蘇る",
+  "傷を負いながらも歩み続けた、昭和の男の哀愁",
+  "港の夜風に吹かれて、別れの歌が波に溶ける",
+  "北の果ての岬に立って、遠い空を見つめていた",
+  "雨が降るたびに、あなたへの想いが溢れてくる",
+  "どこか憎めない寅さん、昭和の人情と温もり",
+  "戦後の東京に活気が戻った、あの弾けるような喜び",
+  "青い海の向こうに夢を描いた、昭和の旅への憧れ",
+  "温泉宿の灯りに揺れる、哀愁漂う宵の歌",
+  "故郷の山河が目に浮かぶ、胸に染み入る望郷の歌",
+  "土佐の青い空と海、故郷を後にした日の記憶",
+  "ワルツのリズムに乗せて、遠い夜の恋物語",
+  "もう一度ワルツが踊れたなら、あの日に戻れるのに",
+  "ふたつの声が重なって、夏のバカンスが弾ける",
+  "追いかけて、追いかけて、恋のフーガが駆け抜ける",
+  "お座敷の灯りのもと、粋な小唄が流れていた",
+  "東京の夜、甘い声とともに恋の歌が流れる",
+  "あなたの幸せを、静かにそっと祈っている",
+  "長崎の雨に濡れながら、あの日の別れを想う",
+  "心の奥に残るあの人の面影、忘れられない記憶",
 ];
 
-let current = -1;
+let player;
 let isNight = false;
 let isPlaying = false;
+let lastMoodIdx = -1;
+let transitionPending = false;
 
-function pickRandom(exclude = -1) {
+function pickRandomMood() {
   let idx;
-  do { idx = Math.floor(Math.random() * songs.length); } while (idx === exclude && songs.length > 1);
-  return idx;
+  do { idx = Math.floor(Math.random() * moodPool.length); } while (idx === lastMoodIdx && moodPool.length > 1);
+  lastMoodIdx = idx;
+  return moodPool[idx];
 }
 
-function showMood(idx) {
-  const s = songs[idx];
-  document.getElementById('mood-text').textContent = s.mood;
-  document.getElementById('song-title').textContent = '♪ ' + s.title;
-  document.getElementById('song-artist').textContent = '〜 ' + s.artist;
+// YouTube IFrame API の準備完了時に呼ばれる
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player('player', {
+    playerVars: {
+      list: PLAYLIST_ID,
+      listType: 'playlist',
+      autoplay: 0,
+      rel: 0,
+      playsinline: 1,
+      modestbranding: 1,
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+    }
+  });
+}
+
+function onPlayerReady() {
+  player.setShuffle(true);
+  player.setLoop(true);
+  showMoodScreen();
+  setTimeout(() => document.getElementById('loading').classList.add('fade'), 1200);
+}
+
+function onPlayerStateChange(event) {
+  if (event.data === YT.PlayerState.PLAYING) {
+    isPlaying = true;
+    updatePlayBtn();
+    // 気分パネルを隠してビデオを表示
+    document.getElementById('mood-panel').classList.add('hidden');
+    document.getElementById('transition-overlay').classList.remove('show');
+    transitionPending = false;
+    // 曲名バーを更新
+    const data = player.getVideoData();
+    const nowPlaying = document.getElementById('now-playing');
+    nowPlaying.textContent = '♪ ' + (data.title || '再生中...');
+    nowPlaying.classList.add('show');
+  } else if (event.data === YT.PlayerState.PAUSED) {
+    isPlaying = false;
+    updatePlayBtn();
+  } else if (event.data === YT.PlayerState.ENDED) {
+    isPlaying = false;
+    updatePlayBtn();
+  }
+}
+
+function showMoodScreen() {
+  document.getElementById('mood-text').textContent = pickRandomMood();
+  document.getElementById('song-title').textContent = '';
+  document.getElementById('song-artist').textContent = '';
   document.getElementById('mood-panel').classList.remove('hidden');
-  document.getElementById('player').src = '';
   document.getElementById('now-playing').classList.remove('show');
-  isPlaying = false;
-  updatePlayBtn();
 }
 
 function playSong() {
-  if (current < 0) current = pickRandom();
-  const s = songs[current];
-  document.getElementById('mood-panel').classList.add('hidden');
-  const url = `https://www.youtube.com/embed/${s.id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-  document.getElementById('player').src = url;
-  const nowPlaying = document.getElementById('now-playing');
-  nowPlaying.textContent = '♪ ' + s.title + '　' + s.artist;
-  nowPlaying.classList.add('show');
-  isPlaying = true;
-  updatePlayBtn();
+  if (!player) return;
+  if (isPlaying) {
+    player.pauseVideo();
+    showMoodScreen();
+  } else {
+    player.playVideo();
+  }
 }
 
 function nextSong() {
-  const next = pickRandom(current);
-  current = next;
-  const s = songs[current];
+  if (!player || transitionPending) return;
+  transitionPending = true;
 
   const overlay = document.getElementById('transition-overlay');
-  document.getElementById('transition-mood').textContent = s.mood;
-  document.getElementById('transition-title').textContent = '♪ ' + s.title;
-  document.getElementById('transition-artist').textContent = '〜 ' + s.artist;
+  document.getElementById('transition-mood').textContent = pickRandomMood();
+  document.getElementById('transition-title').textContent = '次の曲へ...';
+  document.getElementById('transition-artist').textContent = '';
   overlay.classList.add('show');
 
-  document.getElementById('player').src = '';
-  isPlaying = false;
-
   setTimeout(() => {
-    overlay.classList.remove('show');
-    playSong();
-  }, 2200);
+    player.nextVideo();
+    // onStateChange(PLAYING) でoverlay非表示になる
+  }, 2000);
 }
 
 function randomPlay() {
-  current = pickRandom(current);
-  playSong();
+  if (!player) return;
+  const list = player.getPlaylist();
+  if (list && list.length > 0) {
+    player.playVideoAt(Math.floor(Math.random() * list.length));
+  } else {
+    player.nextVideo();
+  }
 }
 
 function updatePlayBtn() {
   const btn = document.getElementById('btn-play');
   btn.textContent = isPlaying ? '⏸ 停止' : '▶ 再生';
-  if (isPlaying) {
-    btn.onclick = stopSong;
-  } else {
-    btn.onclick = playSong;
-  }
-}
-
-function stopSong() {
-  document.getElementById('player').src = '';
-  document.getElementById('mood-panel').classList.remove('hidden');
-  document.getElementById('now-playing').classList.remove('show');
-  isPlaying = false;
-  updatePlayBtn();
 }
 
 function toggleMode() {
@@ -736,22 +758,10 @@ function rotateFreq() {
   document.getElementById('freq-text').textContent = freqTexts[freqIdx];
 }
 
-// 初期化
 window.addEventListener('load', () => {
   buildGrille();
   fixHeight();
   window.addEventListener('resize', fixHeight);
-
-  // 最初の曲をランダムに選択して気分メッセージ表示
-  current = pickRandom();
-  showMood(current);
-
-  // ローディング非表示
-  setTimeout(() => {
-    document.getElementById('loading').classList.add('fade');
-  }, 1200);
-
-  // 周波数テキストのローテーション
   setInterval(rotateFreq, 4000);
 });
 
