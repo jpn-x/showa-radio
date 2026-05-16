@@ -67,7 +67,7 @@ body.night {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px 10px;
+  padding: 8px 16px 6px;
   background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
   border-bottom: 1px solid rgba(255,160,30,0.2);
 }
@@ -99,16 +99,17 @@ body.night {
   flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 16px 8px;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 6px 12px 4px;
+  min-height: 0;
 }
 
 /* ラジオのスクリーン枠 */
 #screen-frame {
   width: 100%;
-  aspect-ratio: 16/9;
-  max-height: 52vw;
+  flex: 1;
+  min-height: 0;
   border: 4px solid #5a3008;
   border-radius: 12px;
   box-shadow:
@@ -208,8 +209,8 @@ body.night {
   position: relative;
   z-index: 2;
   text-align: center;
-  padding: 6px 16px 4px;
-  min-height: 40px;
+  padding: 3px 16px 2px;
+  min-height: 24px;
 }
 
 #now-playing {
@@ -228,8 +229,8 @@ body.night {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 4px 16px 8px;
+  gap: 12px;
+  padding: 2px 16px 4px;
 }
 
 .dial {
@@ -277,8 +278,8 @@ body.night {
   position: relative;
   z-index: 2;
   display: flex;
-  gap: 12px;
-  padding: 0 16px 12px;
+  gap: 10px;
+  padding: 0 12px 8px;
 }
 
 .ctrl-btn {
@@ -300,8 +301,8 @@ body.night {
 #btn-play {
   background: linear-gradient(180deg, #d4850a 0%, #a86008 50%, #8b4e06 100%);
   color: #fff8e0;
-  font-size: 22px;
-  padding: 18px 10px;
+  font-size: 20px;
+  padding: 14px 10px;
   box-shadow: 0 4px 0 #5c3004, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,220,100,0.3);
   text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   letter-spacing: 0.05em;
@@ -315,7 +316,7 @@ body.night {
   background: linear-gradient(180deg, #3d2008 0%, #2a1504 50%, #1e0f02 100%);
   color: #e8a840;
   font-size: 18px;
-  padding: 18px 10px;
+  padding: 14px 10px;
   box-shadow: 0 4px 0 #0a0500, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,180,50,0.1);
   border: 1px solid rgba(255,150,30,0.25);
   text-shadow: 0 0 10px rgba(232,168,64,0.5);
@@ -330,10 +331,10 @@ body.night {
 #speaker {
   position: relative;
   z-index: 2;
-  padding: 8px 20px 14px;
+  padding: 4px 20px 6px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 
 .grille-row {
@@ -513,7 +514,7 @@ body.night #freq-text {
   <div id="speaker" id="speaker-grille"></div>
 
   <!-- ランダム再生ボタン -->
-  <div style="position:relative;z-index:2;padding:0 16px 16px;">
+  <div style="position:relative;z-index:2;padding:0 12px 10px;">
     <button class="ctrl-btn" onclick="randomPlay()" style="
       width:100%;
       background:linear-gradient(180deg,#2a1a00 0%,#1a0e00 100%);
@@ -726,7 +727,7 @@ function toggleMode() {
 // スピーカーグリル生成
 function buildGrille() {
   const speaker = document.getElementById('speaker');
-  for (let r = 0; r < 3; r++) {
+  for (let r = 0; r < 1; r++) {
     const row = document.createElement('div');
     row.className = 'grille-row';
     for (let c = 0; c < 28; c++) {
