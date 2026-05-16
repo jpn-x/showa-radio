@@ -512,6 +512,20 @@ body.night #freq-text {
   <!-- スピーカーグリル -->
   <div id="speaker" id="speaker-grille"></div>
 
+  <div style="position:relative;z-index:2;padding:0 12px 10px;">
+    <button class="ctrl-btn" onclick="randomPlay()" style="
+      width:100%;
+      background:linear-gradient(180deg,#2a1a00 0%,#1a0e00 100%);
+      color:#c8900a;
+      font-size:16px;
+      padding:13px 10px;
+      border:1px solid rgba(255,140,0,0.2);
+      border-radius:10px;
+      box-shadow:0 3px 0 #0a0500,0 3px 10px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,150,30,0.08);
+      letter-spacing:0.08em;
+    ">🎲 ランダム再生</button>
+  </div>
+
 </div>
 
 <script>
@@ -625,8 +639,13 @@ function nextSong() {
 
   setTimeout(() => {
     overlay.classList.remove('show');
-    showMood(current);
+    playSong();
   }, 2200);
+}
+
+function randomPlay() {
+  current = pickRandom(current);
+  playSong();
 }
 
 function updatePlayBtn() {
