@@ -726,6 +726,19 @@ window.addEventListener('load', () => {
   setInterval(rotateFreq, 4000);
 });
 
+// スワイプ下で次の曲
+(function() {
+  let startY = 0, pulling = false;
+  document.addEventListener('touchstart', e => {
+    if (window.scrollY === 0) { startY = e.touches[0].clientY; pulling = true; }
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!pulling) return;
+    if (e.touches[0].clientY - startY > 72) { pulling = false; nextSong(); }
+  }, { passive: true });
+  document.addEventListener('touchend', () => { pulling = false; });
+})();
+
 // バックボタン対策
 history.pushState(null, '', location.href);
 window.addEventListener('popstate', () => {
