@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>昭和青春ラジオ</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3d1f00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', Georgia, serif;
+  background: #1a0800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.8s;
+}
+
+body.night {
+  background: #0d0400;
+}
+
+/* ===== ラジオ本体 ===== */
+#radio {
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(160deg, #6b3310 0%, #8b4a18 15%, #5c2a0a 30%, #7a3d15 50%, #5c2a0a 70%, #8b4a18 85%, #6b3310 100%);
+  box-shadow: inset 2px 0 4px rgba(255,200,100,0.1), inset -2px 0 4px rgba(0,0,0,0.4), 4px 0 20px rgba(0,0,0,0.6);
+}
+
+/* 木目模様 */
+#radio::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      92deg,
+      transparent 0px, transparent 8px,
+      rgba(0,0,0,0.06) 8px, rgba(0,0,0,0.06) 9px,
+      transparent 9px, transparent 18px,
+      rgba(255,180,80,0.04) 18px, rgba(255,180,80,0.04) 19px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== ヘッダー ===== */
+#header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 10px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255,160,30,0.2);
+}
+
+#brand {
+  font-size: 20px;
+  font-weight: bold;
+  color: #f5c56a;
+  text-shadow: 0 0 12px rgba(255,180,50,0.8), 0 1px 3px rgba(0,0,0,0.8);
+  letter-spacing: 0.05em;
+}
+
+#mode-btn {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,160,30,0.4);
+  border-radius: 20px;
+  color: #f5c56a;
+  font-size: 15px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+#mode-btn:active { opacity: 0.7; }
+
+/* ===== ディスプレイ部分 ===== */
+#display-area {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px 8px;
+}
+
+/* ラジオのスクリーン枠 */
+#screen-frame {
+  width: 100%;
+  aspect-ratio: 16/9;
+  max-height: 52vw;
+  border: 4px solid #5a3008;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 20px rgba(0,0,0,0.9),
+    0 0 0 2px #9a6020,
+    0 0 0 4px #3d1800,
+    0 0 20px rgba(200,120,0,0.3);
+  background: #050200;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 画面の照り返し */
+#screen-frame::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 10;
+  border-radius: 8px 8px 0 0;
+}
+
+/* ムードメッセージ */
+#mood-panel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #050200;
+  padding: 20px;
+  z-index: 5;
+  transition: opacity 0.6s;
+}
+
+#mood-panel.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#mood-text {
+  color: #e8a840;
+  font-size: 16px;
+  line-height: 1.8;
+  text-align: center;
+  text-shadow: 0 0 20px rgba(232,168,64,0.6);
+  letter-spacing: 0.08em;
+}
+
+#song-info {
+  margin-top: 16px;
+  text-align: center;
+}
+
+#song-title {
+  color: #f5c56a;
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: 0 0 10px rgba(245,197,106,0.5);
+}
+
+#song-artist {
+  color: #c8900a;
+  font-size: 15px;
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+}
+
+/* アンビエントグロー（再生中） */
+#mood-panel .glow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e8a840;
+  margin-top: 20px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* YouTube iframe */
+#player {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ===== 曲情報バー ===== */
+#song-bar {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 6px 16px 4px;
+  min-height: 40px;
+}
+
+#now-playing {
+  color: #c8900a;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+#now-playing.show { opacity: 1; }
+
+/* ===== ダイヤル装飾 ===== */
+#dial-row {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 4px 16px 8px;
+}
+
+.dial {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #8b5a1a, #3d1800 70%);
+  border: 2px solid #6b3a10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,200,80,0.15);
+  position: relative;
+}
+
+.dial::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  width: 2px;
+  height: 12px;
+  background: rgba(255,180,50,0.6);
+  border-radius: 1px;
+  margin-top: -6px;
+}
+
+#freq-display {
+  flex: 1;
+  background: linear-gradient(90deg, rgba(0,0,0,0.6), rgba(30,15,0,0.8), rgba(0,0,0,0.6));
+  border: 1px solid rgba(255,140,0,0.3);
+  border-radius: 4px;
+  padding: 6px 10px;
+  text-align: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+#freq-text {
+  color: #f0a020;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 8px rgba(240,160,32,0.7);
+}
+
+/* ===== コントロールボタン ===== */
+#controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 12px;
+  padding: 0 16px 12px;
+}
+
+.ctrl-btn {
+  flex: 1;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: bold;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.ctrl-btn:active {
+  transform: translateY(2px);
+}
+
+#btn-play {
+  background: linear-gradient(180deg, #d4850a 0%, #a86008 50%, #8b4e06 100%);
+  color: #fff8e0;
+  font-size: 22px;
+  padding: 18px 10px;
+  box-shadow: 0 4px 0 #5c3004, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,220,100,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  letter-spacing: 0.05em;
+}
+
+#btn-play:active {
+  box-shadow: 0 1px 0 #5c3004, 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,220,100,0.2);
+}
+
+#btn-next {
+  background: linear-gradient(180deg, #3d2008 0%, #2a1504 50%, #1e0f02 100%);
+  color: #e8a840;
+  font-size: 18px;
+  padding: 18px 10px;
+  box-shadow: 0 4px 0 #0a0500, 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,180,50,0.1);
+  border: 1px solid rgba(255,150,30,0.25);
+  text-shadow: 0 0 10px rgba(232,168,64,0.5);
+  letter-spacing: 0.05em;
+}
+
+#btn-next:active {
+  box-shadow: 0 1px 0 #0a0500, 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* ===== スピーカーグリル ===== */
+#speaker {
+  position: relative;
+  z-index: 2;
+  padding: 8px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.grille-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.grille-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  box-shadow: inset 0 1px 1px rgba(255,150,30,0.1);
+}
+
+/* ===== ナイトモード ===== */
+body.night #radio {
+  background: linear-gradient(160deg, #3d1a06 0%, #4d2208 15%, #2e1204 30%, #4a1e08 50%, #2e1204 70%, #4d2208 85%, #3d1a06 100%);
+}
+
+body.night #brand {
+  color: #d4905a;
+  text-shadow: 0 0 12px rgba(212,144,90,0.6), 0 1px 3px rgba(0,0,0,0.8);
+}
+
+body.night #mood-text {
+  color: #c07830;
+  text-shadow: 0 0 20px rgba(192,120,48,0.5);
+}
+
+body.night #song-title { color: #d4905a; }
+body.night #freq-text {
+  color: #c07030;
+  text-shadow: 0 0 8px rgba(192,112,48,0.6);
+}
+
+/* ===== ローディング ===== */
+#loading {
+  position: fixed;
+  inset: 0;
+  background: #1a0800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 100;
+  gap: 16px;
+  transition: opacity 0.8s;
+}
+
+#loading.fade { opacity: 0; pointer-events: none; }
+
+#loading-text {
+  color: #f5c56a;
+  font-size: 22px;
+  text-shadow: 0 0 20px rgba(245,197,106,0.6);
+  animation: fadeInOut 2s infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+#loading-sub {
+  color: #a06828;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+}
+
+/* ===== 次の曲 遷移オーバーレイ ===== */
+#transition-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5,2,0,0.92);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+#transition-overlay.show {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#transition-mood {
+  color: #e8a840;
+  font-size: 16px;
+  text-align: center;
+  padding: 0 30px;
+  line-height: 1.8;
+  text-shadow: 0 0 20px rgba(232,168,64,0.5);
+}
+
+#transition-title {
+  color: #f5c56a;
+  font-size: 22px;
+  font-weight: bold;
+  text-shadow: 0 0 15px rgba(245,197,106,0.6);
+}
+
+#transition-artist {
+  color: #c8900a;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="font-size:48px">📻</div>
+  <div id="loading-text">昭和青春ラジオ</div>
+  <div id="loading-sub">チューニング中...</div>
+</div>
+
+<div id="radio">
+
+  <!-- ヘッダー -->
+  <div id="header">
+    <div id="brand">📻 昭和青春ラジオ</div>
+    <button id="mode-btn" onclick="toggleMode()">🌙 夜</button>
+  </div>
+
+  <!-- ディスプレイ -->
+  <div id="display-area">
+    <div id="screen-frame">
+      <!-- ムードパネル -->
+      <div id="mood-panel">
+        <p id="mood-text"></p>
+        <div id="song-info">
+          <div id="song-title"></div>
+          <div id="song-artist"></div>
+        </div>
+        <div class="glow-dot"></div>
+      </div>
+      <!-- YouTube -->
+      <iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- 次の曲 遷移オーバーレイ -->
+  <div id="transition-overlay">
+    <div id="transition-mood"></div>
+    <div id="transition-title"></div>
+    <div id="transition-artist"></div>
+  </div>
+
+  <!-- 曲情報バー -->
+  <div id="song-bar">
+    <div id="now-playing"></div>
+  </div>
+
+  <!-- ダイヤル装飾 -->
+  <div id="dial-row">
+    <div class="dial"></div>
+    <div id="freq-display">
+      <div id="freq-text">♪ SW 昭和 810kHz ♪</div>
+    </div>
+    <div class="dial"></div>
+  </div>
+
+  <!-- コントロール -->
+  <div id="controls">
+    <button id="btn-play" class="ctrl-btn" onclick="playSong()">▶ 再生</button>
+    <button id="btn-next" class="ctrl-btn" onclick="nextSong()">次の曲 ▶▶</button>
+  </div>
+
+  <!-- スピーカーグリル -->
+  <div id="speaker" id="speaker-grille"></div>
+
+</div>
+
+<script>
+const songs = [
+  { title:"柔", artist:"美空ひばり", id:"U4NFP_hKPqs", mood:"ラジオから流れてくる、あの懐かしい声がします" },
+  { title:"お祭りマンボ", artist:"美空ひばり", id:"hGBU4wlrT5A", mood:"縁日の夜、賑やかな歌声が商店街に響いていた" },
+  { title:"川の流れのように", artist:"美空ひばり", id:"Pb-N5VPy-40", mood:"人生という川は、ゆっくりと、ゆっくりと流れてゆく" },
+  { title:"上を向いて歩こう", artist:"坂本九", id:"ip2U3w6b9rU", mood:"涙がこぼれないように、空を見上げて歩いた日々" },
+  { title:"見上げてごらん夜の星を", artist:"坂本九", id:"3hNQsRmAAC0", mood:"夜空に輝く星たちが、そっとあなたを照らしている" },
+  { title:"明日があるさ", artist:"坂本九", id:"W4rpbXLGVT4", mood:"どんな日も、明日はきっといい日になる。そう信じていた" },
+  { title:"恋の町札幌", artist:"石原裕次郎", id:"xKsP_vFVi9c", mood:"北の都の青い空に、あの頃の青春が蘇ってくる" },
+  { title:"夜霧よ今夜も有難う", artist:"石原裕次郎", id:"rVG3x1BsE-4", mood:"港の夜霧に包まれて、遠い記憶がゆらゆら漂う" },
+  { title:"ブランデーグラス", artist:"石原裕次郎", id:"IOgAf9iHE0o", mood:"グラスの中に、昭和の夜の灯りが揺れている" },
+  { title:"別れの一本杉", artist:"春日八郎", id:"EVFnx9SfIMM", mood:"丘の上の一本杉のもと、あの別れの日を静かに想う" },
+  { title:"お富さん", artist:"春日八郎", id:"p2sDnxlepRU", mood:"粋でいなせな江戸の風情、昭和に蘇る名曲" },
+  { title:"哀愁列車", artist:"三橋美智也", id:"EB_sSvj81qg", mood:"汽笛が遠ざかるたびに、旅の哀愁が胸に染みる" },
+  { title:"夕焼けとんび", artist:"三橋美智也", id:"puTR6WI01XY", mood:"夕焼け色の空にとんびが舞う、懐かしい故郷の景色" },
+  { title:"王将", artist:"村田英雄", id:"f4ys6bg-G_E", mood:"男の不屈の魂、昭和を生きた人々の誇り" },
+  { title:"人生劇場", artist:"村田英雄", id:"NQ8l9_vD0Do", mood:"人生という名の舞台に、今日も幕が上がる" },
+  { title:"アンコ椿は恋の花", artist:"都はるみ", id:"ADni5mr0IH4", mood:"南の島に椿が咲いて、恋の歌声が潮風に乗る" },
+  { title:"北の宿から", artist:"都はるみ", id:"BfX11nTfp3Y", mood:"雪深い宿に届く、温かな想いの一首" },
+  { title:"東京だョおっ母さん", artist:"島倉千代子", id:"agqzvIx7wLE", mood:"お母さんと歩いた東京、あの懐かしい街の風景" },
+  { title:"からたち日記", artist:"島倉千代子", id:"Ik67FcC1YHk", mood:"からたちの垣根のそばで、青春の思い出が咲いている" },
+  { title:"丘を越えて", artist:"藤山一郎", id:"Uy54auHnKhA", mood:"丘を越え、野を越えて、あの頃の希望の歌が響く" },
+  { title:"伊勢佐木町ブルース", artist:"青江三奈", id:"BKkTqOtWXio", mood:"横浜の夜の灯りのなかに、あの街の記憶が揺れる" },
+  { title:"長崎ブルース", artist:"青江三奈", id:"3EjoLwwSf38", mood:"長崎の港に夕暮れが来て、遠い日の歌声が流れてくる" },
+];
+
+let current = -1;
+let isNight = false;
+let isPlaying = false;
+
+function pickRandom(exclude = -1) {
+  let idx;
+  do { idx = Math.floor(Math.random() * songs.length); } while (idx === exclude && songs.length > 1);
+  return idx;
+}
+
+function showMood(idx) {
+  const s = songs[idx];
+  document.getElementById('mood-text').textContent = s.mood;
+  document.getElementById('song-title').textContent = '♪ ' + s.title;
+  document.getElementById('song-artist').textContent = '〜 ' + s.artist;
+  document.getElementById('mood-panel').classList.remove('hidden');
+  document.getElementById('player').src = '';
+  document.getElementById('now-playing').classList.remove('show');
+  isPlaying = false;
+  updatePlayBtn();
+}
+
+function playSong() {
+  if (current < 0) current = pickRandom();
+  const s = songs[current];
+  document.getElementById('mood-panel').classList.add('hidden');
+  const url = `https://www.youtube.com/embed/${s.id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+  document.getElementById('player').src = url;
+  const nowPlaying = document.getElementById('now-playing');
+  nowPlaying.textContent = '♪ ' + s.title + '　' + s.artist;
+  nowPlaying.classList.add('show');
+  isPlaying = true;
+  updatePlayBtn();
+}
+
+function nextSong() {
+  const next = pickRandom(current);
+  current = next;
+  const s = songs[current];
+
+  const overlay = document.getElementById('transition-overlay');
+  document.getElementById('transition-mood').textContent = s.mood;
+  document.getElementById('transition-title').textContent = '♪ ' + s.title;
+  document.getElementById('transition-artist').textContent = '〜 ' + s.artist;
+  overlay.classList.add('show');
+
+  document.getElementById('player').src = '';
+  isPlaying = false;
+
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    showMood(current);
+  }, 2200);
+}
+
+function updatePlayBtn() {
+  const btn = document.getElementById('btn-play');
+  btn.textContent = isPlaying ? '⏸ 停止' : '▶ 再生';
+  if (isPlaying) {
+    btn.onclick = stopSong;
+  } else {
+    btn.onclick = playSong;
+  }
+}
+
+function stopSong() {
+  document.getElementById('player').src = '';
+  document.getElementById('mood-panel').classList.remove('hidden');
+  document.getElementById('now-playing').classList.remove('show');
+  isPlaying = false;
+  updatePlayBtn();
+}
+
+function toggleMode() {
+  isNight = !isNight;
+  document.body.classList.toggle('night', isNight);
+  document.getElementById('mode-btn').textContent = isNight ? '☀ 昼' : '🌙 夜';
+}
+
+// スピーカーグリル生成
+function buildGrille() {
+  const speaker = document.getElementById('speaker');
+  for (let r = 0; r < 3; r++) {
+    const row = document.createElement('div');
+    row.className = 'grille-row';
+    for (let c = 0; c < 28; c++) {
+      const dot = document.createElement('div');
+      dot.className = 'grille-dot';
+      row.appendChild(dot);
+    }
+    speaker.appendChild(row);
+  }
+}
+
+// 高さ調整
+function fixHeight() {
+  const h = window.innerHeight;
+  document.getElementById('radio').style.height = h + 'px';
+  document.body.style.height = h + 'px';
+}
+
+// 周波数表示アニメ
+const freqTexts = [
+  '♪ SW 昭和 810kHz ♪',
+  '♪ AM 昭和歌謡 ♪',
+  '♪ 青春メロディー ♪',
+  '♪ RETRO RADIO ♪',
+];
+let freqIdx = 0;
+function rotateFreq() {
+  freqIdx = (freqIdx + 1) % freqTexts.length;
+  document.getElementById('freq-text').textContent = freqTexts[freqIdx];
+}
+
+// 初期化
+window.addEventListener('load', () => {
+  buildGrille();
+  fixHeight();
+  window.addEventListener('resize', fixHeight);
+
+  // 最初の曲をランダムに選択して気分メッセージ表示
+  current = pickRandom();
+  showMood(current);
+
+  // ローディング非表示
+  setTimeout(() => {
+    document.getElementById('loading').classList.add('fade');
+  }, 1200);
+
+  // 周波数テキストのローテーション
+  setInterval(rotateFreq, 4000);
+});
+
+// バックボタン対策
+history.pushState(null, '', location.href);
+window.addEventListener('popstate', () => {
+  history.pushState(null, '', location.href);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "昭和青春ラジオ",
+  "short_name": "昭和ラジオ",
+  "description": "懐かしい昭和の名曲をランダムで楽しむラジオ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a0800",
+  "theme_color": "#3d1f00",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
